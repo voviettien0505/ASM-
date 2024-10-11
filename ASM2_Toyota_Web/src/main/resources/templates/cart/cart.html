@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Giỏ Hàng</title>
+  <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+<div class="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+  <h1 class="text-2xl font-semibold mb-6">Giỏ Hàng</h1>
+  <table class="w-full table-auto">
+    <thead>
+    <tr>
+      <th class="px-4 py-2">Sản Phẩm</th>
+      <th class="px-4 py-2">Đơn Giá</th>
+      <th class="px-4 py-2">Số Lượng</th>
+      <th class="px-4 py-2">Tổng Cộng</th>
+      <th class="px-4 py-2">Xóa</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${cartItems}">
+      <td th:text="${item.product.name}"></td>
+      <td th:text="${item.product.price}"></td>
+      <td th:text="${item.quantity}"></td>
+      <td th:text="${item.product.price * item.quantity}"></td>
+    </tr>
+
+    </tbody>
+  </table>
+  <div class="mt-4 text-right">
+    <span class="font-bold text-lg">Tổng cộng: </span>
+    <span class="text-xl" th:text="${totalAmount}">0</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cart Item Details</title>
+</head>
+<body>
+<h2>Cart Item Details</h2>
+<div th:if="${productDetails}">
+    <p th:text="'Product: ' + ${productDetails.productName}"></p>
+    <p th:text="'Quantity: ' + ${productDetails.quantity}"></p>
+</div>
+</body>
+</html>

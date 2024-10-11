@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi Tiết Xe Hơi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100">
+<div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg mt-8">
+    <div class="flex flex-wrap">
+        <!-- Main Image Display -->
+        <div class="w-full md:w-1/2">
+            <img th:src="@{'/images/' + ${images[0]?.imageName}}" alt="Ảnh xe hơi" class="w-full h-96 object-cover rounded-lg"/>
+            <div class="flex mt-4 space-x-3">
+                <img th:each="image : ${images}" th:src="@{'/images/' + ${image.imageName}}" alt="Hình thu nhỏ xe" class="w-1/5 h-16 object-cover rounded-md shadow"/>
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="w-full md:w-1/2 pl-0 md:pl-8 mt-6 md:mt-0">
+            <h1 class="text-indigo-600 font-bold uppercase tracking-wide">Xe Hơi Mới Nhất</h1>
+            <h2 class="text-3xl font-semibold text-gray-800 mt-2" th:text="${product.name}">Tên Xe Hơi</h2>
+            <p class="text-gray-600 mt-4" th:text="${product.description}">Mô tả chi tiết về xe hơi.</p>
+
+            <!-- Pricing and Promotion -->
+            <div class="mt-6">
+                <span class="line-through text-gray-500 text-xl">₫1,200,000,000</span>
+                <span class="text-red-600 text-4xl font-bold ml-4" th:text="${product.price}">₫0</span>
+            </div>
+
+            <!-- Stock Information -->
+            <div class="mt-6">
+                <span class="text-gray-700 text-lg">Tình Trạng:</span>
+                <span class="ml-2 font-bold text-green-600">Còn hàng</span>
+                <span class="ml-2 text-sm">(<span th:text="${product.quantity}">0</span> chiếc có sẵn)</span>
+            </div>
+
+            <!-- Quantity Adjustment -->
+            <div class="mt-6">
+                <span class="text-gray-700 text-lg">Số Lượng</span>
+                <div class="flex items-center mt-2">
+                    <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l-md transition duration-200 focus:outline-none"
+                            onclick="adjustQuantity(-1)">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input id="quantity" class="w-16 text-center border-t border-b border-gray-300 outline-none focus:ring-2 focus:ring-indigo-300"
+                           type="number" value="1" min="1" max="[[${product.quantity}]]" onchange="validateQuantity()" />
+                    <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r-md transition duration-200 focus:outline-none"
+                            onclick="adjustQuantity(1)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <p id="error-message" class="text-red-500 mt-2 hidden">Số lượng vượt quá mức tồn kho!</p>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <form th:action="@{/cart/add}" method="post" onsubmit="syncQuantityValue()">
+                <input type="hidden" name="productId" th:value="${product.id}"/>
+                <input type="hidden" name="quantity" id="hiddenQuantity" value="1"/> <!-- Input ẩn không cần trùng id -->
+                <button type="submit" class="bg-blue-600 text-white rounded-lg px-6 py-2 font-semibold hover:bg-blue-700 transition duration-300">
+                    Thêm Vào Giỏ Hàng
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Định nghĩa số lượng tối đa có sẵn từ server
+    const maxQuantity = [[${product.quantity}]];
+
+    // Hàm điều chỉnh số lượng
+    function adjustQuantity(amount) {
+        const quantityInput = document.getElementById("quantity");
+        const hiddenQuantity = document.getElementById("hiddenQuantity");
+        let currentQuantity = parseInt(quantityInput.value) || 1;
+        let newQuantity = currentQuantity + amount;
+
+        // Kiểm tra giá trị giới hạn của số lượng
+        if (newQuantity < 1) {
+            newQuantity = 1;
+        } else if (newQuantity > maxQuantity) {
+            newQuantity = maxQuantity;
+            document.getElementById("error-message").classList.remove("hidden");
+        } else {
+            document.getElementById("error-message").classList.add("hidden");
+        }
+
+        // Cập nhật giá trị mới vào cả hai input
+        quantityInput.value = newQuantity;
+        hiddenQuantity.value = newQuantity;
+    }
+
+    // Hàm kiểm tra và đồng bộ giá trị số lượng
+    function validateQuantity() {
+        const quantityInput = document.getElementById("quantity");
+        const hiddenQuantity = document.getElementById("hiddenQuantity");
+        const errorMessage = document.getElementById("error-message");
+        let currentQuantity = parseInt(quantityInput.value) || 1;
+
+        // Kiểm tra giá trị hợp lệ
+        if (currentQuantity < 1) {
+            currentQuantity = 1;
+        } else if (currentQuantity > maxQuantity) {
+            currentQuantity = maxQuantity;
+            errorMessage.classList.remove("hidden");
+        } else {
+            errorMessage.classList.add("hidden");
+        }
+
+        // Cập nhật giá trị mới vào cả hai input
+        quantityInput.value = currentQuantity;
+        hiddenQuantity.value = currentQuantity;
+    }
+
+    // Hàm đồng bộ giá trị số lượng khi gửi biểu mẫu
+    function syncQuantityValue() {
+        const quantityInput = document.getElementById("quantity");
+        const hiddenQuantity = document.getElementById("hiddenQuantity");
+
+        hiddenQuantity.value = quantityInput.value; // Đồng bộ giá trị từ input với hidden input
+    }
+
+    // Thêm sự kiện lắng nghe thay đổi giá trị số lượng
+    document.getElementById("quantity").addEventListener("input", validateQuantity);
+
+</script>
+</body>
+</html>
