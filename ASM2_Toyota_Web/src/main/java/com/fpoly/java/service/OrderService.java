@@ -23,14 +23,9 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    private CartItemService cartItemService;
-
-    public void createOrderFromCart(User user) {
-        List<CartItem> cartItems = cartItemService.getCartItemsByUser(user);
-
-        if (cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Cart is empty.");
+    public void createOrderWithSelectedItems(User user, List<Long> productIds, List<Integer> quantities) {
+        if (productIds.isEmpty() || quantities.isEmpty()) {
+            throw new IllegalArgumentException("No products selected.");
         }
 
         Order order = new Order();
@@ -38,13 +33,15 @@ public class OrderService {
         order.setDate(new Date());
         order.setStatus("Pending");
 
-        // Save the order first to generate an order ID
+        // Save the order to generate an ID
         order = orderRepository.save(order);
 
-        for (CartItem cartItem : cartItems) {
-            Product product = cartItem.getProduct();
-            int quantity = cartItem.getQuantity();
+        // Create order details for each selected item
+        for (int i = 0; i < productIds.size(); i++) {
+            Long productId = productIds.get(i);
+            Integer quantity = quantities.get(i);
 
+            Product product = productRepository.findById(productId).orElse(null);
             if (product != null && quantity > 0) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrder(order);
@@ -56,8 +53,6 @@ public class OrderService {
                 orderDetailRepository.save(orderDetail);
             }
         }
-
-        // Clear the user's cart after placing the order
-//        cartItemService.clearCartItemsByUser(user);
     }
 }
+

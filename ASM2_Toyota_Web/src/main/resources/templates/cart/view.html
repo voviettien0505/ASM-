@@ -25,6 +25,8 @@
         <tr th:each="cartItem : ${cartItems}" class="hover:bg-gray-50 transition">
             <td class="py-4 px-6 text-center border-b border-gray-300">
                 <input type="checkbox" class="item-checkbox" />
+                <input type="hidden" class="product-id" th:value="${cartItem.product.id}"/>
+                <input type="hidden" class="product-quantity" th:value="${cartItem.quantity}"/>
             </td>
             <td class="py-4 px-6 border-b border-gray-300" th:text="${cartItem.product.name}">Tên sản phẩm</td>
             <td class="py-4 px-6 text-center border-b border-gray-300" th:text="${cartItem.quantity}">Số lượng</td>
@@ -55,84 +57,103 @@
 </div>
 
 <script>
-    // Function to calculate and display the total amount for selected items
-    function calculateTotal() {
-        let total = 0;
-
-        // Iterate over each selected item and sum the total amount
-        $('.item-checkbox:checked').each(function() {
-            const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, ''); // Remove formatting
-            total += parseFloat(rowTotal) || 0; // Add to total, handling NaN values
-        });
-
-        // Update the total amount display
-        $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
-    }
-
-    // Calculate total on page load and whenever a checkbox is clicked
     $(document).ready(function() {
         calculateTotal();
 
-        // Recalculate total whenever a checkbox changes
-        $('.item-checkbox').on('change', function() {
-            calculateTotal();
-        });
-    });
-
-</script>
-<script>
-    $(document).ready(function() {
-        calculateTotal();
-
-        // Cập nhật tổng tiền khi thay đổi lựa chọn sản phẩm
+        // Recalculate the total when checkbox status changes
         $('.item-checkbox').on('change', function() {
             calculateTotal();
         });
 
-        // Xử lý khi nhấn "Đặt Hàng"
+        // Filter selected items and submit the form
         $('#place-order-form').on('submit', function(event) {
-            event.preventDefault(); // Ngăn không cho form gửi đi ngay
+            event.preventDefault();
 
-            // Xóa các input ẩn cũ (nếu có) để tránh trùng lặp
+            // Remove previous hidden inputs to avoid duplication
             $('#place-order-form input[name="productIds"]').remove();
             $('#place-order-form input[name="quantities"]').remove();
 
-            // Lấy dữ liệu sản phẩm và số lượng từ các ô checkbox đã chọn
+            // Loop over checked checkboxes and collect data
             $('.item-checkbox:checked').each(function() {
                 const row = $(this).closest('tr');
-                const productId = row.find('input[name="cartItemId"]').val(); // ID sản phẩm
-                const quantity = row.find('td:nth-child(3)').text().trim(); // Số lượng
+                const productId = row.find('.product-id').val();
+                const quantity = row.find('.product-quantity').val();
 
-                // Thêm thông tin sản phẩm và số lượng dưới dạng input ẩn vào form
+                // Append data to the form
                 $('#place-order-form').append(`<input type="hidden" name="productIds" value="${productId}">`);
                 $('#place-order-form').append(`<input type="hidden" name="quantities" value="${quantity}">`);
             });
 
-            // Gửi form sau khi đã thêm input ẩn
+            // Check that at least one item is selected
+            if ($('.item-checkbox:checked').length === 0) {
+                alert('Please select at least one item to place an order.');
+                return false;
+            }
+
+            // Submit the form
             this.submit();
         });
+
+        // Calculate the total amount for selected items
+        function calculateTotal() {
+            let total = 0;
+            $('.item-checkbox:checked').each(function() {
+                const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, '');
+                total += parseFloat(rowTotal) || 0;
+            });
+            $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+        }
     });
+</script>
 
-    // Hàm tính tổng tiền các sản phẩm đã chọn
-    function calculateTotal() {
-        let total = 0;
+<script>
+    $(document).ready(function() {
+        calculateTotal();
 
-        $('.item-checkbox:checked').each(function() {
-            const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, '');
-            total += parseFloat(rowTotal) || 0;
+        // Update the total amount when items are selected or deselected
+        $('.item-checkbox').on('change', function() {
+            calculateTotal();
         });
 
-        $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
-    }
+        // Handle form submission
+        $('#place-order-form').on('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
 
-    $('#place-order-form').on('submit', function(event) {
-        if ($('.item-checkbox:checked').length === 0) {
-            alert('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
-            return false; // Ngăn không cho form gửi đi
+            // Clear previous hidden inputs to avoid duplicates
+            $('#place-order-form input[name="productIds"]').remove();
+            $('#place-order-form input[name="quantities"]').remove();
+
+            // Add hidden inputs for selected products and their quantities
+            $('.item-checkbox:checked').each(function() {
+                const row = $(this).closest('tr');
+                const productId = row.find('.product-id').val();
+                const quantity = row.find('.product-quantity').val();
+
+                // Append the selected items' IDs and quantities to the form
+                $('#place-order-form').append(`<input type="hidden" name="productIds" value="${productId}">`);
+                $('#place-order-form').append(`<input type="hidden" name="quantities" value="${quantity}">`);
+            });
+
+            // Ensure at least one item is selected before submitting
+            if ($('.item-checkbox:checked').length === 0) {
+                alert('Please select at least one product to place an order.');
+                return false;
+            }
+
+            // Submit the form
+            this.submit();
+        });
+
+        // Calculate and display the total for selected items
+        function calculateTotal() {
+            let total = 0;
+            $('.item-checkbox:checked').each(function() {
+                const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, '');
+                total += parseFloat(rowTotal) || 0;
+            });
+            $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
         }
-        // Phần xử lý tiếp theo
     });
-
 </script>
 
 </body>
