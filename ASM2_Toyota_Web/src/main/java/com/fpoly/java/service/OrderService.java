@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+
 @Service
 public class OrderService {
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -21,33 +23,41 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    public void createOrder(User user, List<Long> productIds, List<Integer> quantities) {
+    @Autowired
+    private CartItemService cartItemService;
+
+    public void createOrderFromCart(User user) {
+        List<CartItem> cartItems = cartItemService.getCartItemsByUser(user);
+
+        if (cartItems.isEmpty()) {
+            throw new IllegalArgumentException("Cart is empty.");
+        }
+
         Order order = new Order();
         order.setUser(user);
         order.setDate(new Date());
         order.setStatus("Pending");
 
-        // Lưu đơn hàng
+        // Save the order first to generate an order ID
         order = orderRepository.save(order);
 
-        // Lưu chi tiết đơn hàng
-        for (int i = 0; i < productIds.size(); i++) {
-            Long productId = productIds.get(i);
-            Integer quantity = quantities.get(i);
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+            int quantity = cartItem.getQuantity();
 
-            Product product = productRepository.findById(productId).orElse(null);
-            if (product != null) {
+            if (product != null && quantity > 0) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setOrder(order);
                 orderDetail.setProduct(product);
                 orderDetail.setQuantity(quantity);
                 orderDetail.setPrice(product.getPrice() * quantity);
 
-                // Lưu chi tiết đơn hàng
+                // Save each order detail
                 orderDetailRepository.save(orderDetail);
             }
         }
+
+        // Clear the user's cart after placing the order
+//        cartItemService.clearCartItemsByUser(user);
     }
 }
-
-

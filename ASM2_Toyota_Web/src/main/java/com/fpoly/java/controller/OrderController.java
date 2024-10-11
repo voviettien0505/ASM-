@@ -9,13 +9,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/order")
 public class OrderController {
+
     @Autowired
     private OrderService orderService;
 
@@ -23,15 +21,15 @@ public class OrderController {
     private UserService userService;
 
     @PostMapping("/place")
-    public String placeOrder(@RequestParam List<Long> productIds,
-                             @RequestParam List<Integer> quantities,
-                             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
+    public String placeOrder(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByUsername(userDetails.getUsername());
+        if (user == null) {
+            return "error/userNotFound";
+        }
 
-        // Tạo đơn hàng mới và lưu thông tin chi tiết đơn hàng
-        orderService.createOrder(user, productIds, quantities);
+        // Create an order from the user's cart items
+        orderService.createOrderFromCart(user);
 
         return "redirect:/order/confirmation";
     }
 }
-
