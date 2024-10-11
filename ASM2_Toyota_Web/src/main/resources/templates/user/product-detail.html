@@ -5,6 +5,7 @@
     <title>Chi Tiết Xe Hơi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="bg-gray-100">
 <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg mt-8">
@@ -55,30 +56,55 @@
             </div>
 
             <!-- Add to Cart Button -->
-            <form th:action="@{/cart/add}" method="post" onsubmit="syncQuantityValue()">
+            <form id="add-to-cart-form" th:action="@{/cart/add}" method="post">
                 <input type="hidden" name="productId" th:value="${product.id}"/>
-                <input type="hidden" name="quantity" id="hiddenQuantity" value="1"/> <!-- Input ẩn không cần trùng id -->
+                <input type="hidden" name="quantity" id="hiddenQuantity" value="1"/>
                 <button type="submit" class="bg-blue-600 text-white rounded-lg px-6 py-2 font-semibold hover:bg-blue-700 transition duration-300">
                     Thêm Vào Giỏ Hàng
                 </button>
             </form>
 
+            <!-- Success Message -->
+            <div id="success-message" class="text-green-600 font-semibold mt-4 hidden">
+                Thêm vào giỏ hàng thành công!
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Định nghĩa số lượng tối đa có sẵn từ server
+    $(document).ready(function() {
+        // Handle form submission with AJAX
+        $('#add-to-cart-form').on('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = $(this);
+            const url = form.attr('action');
+            const formData = form.serialize(); // Serialize form data for AJAX
+
+            $.post(url, formData, function(response) {
+                // Show the success message
+                $('#success-message').removeClass('hidden');
+
+                // Optionally, reset the quantity input
+                $('#quantity').val(1);
+                $('#hiddenQuantity').val(1);
+            }).fail(function() {
+                // Handle any errors here
+                alert('Có lỗi xảy ra khi thêm vào giỏ hàng. Vui lòng thử lại.');
+            });
+        });
+    });
+
+    // JavaScript quantity adjustment and validation functions
     const maxQuantity = [[${product.quantity}]];
 
-    // Hàm điều chỉnh số lượng
     function adjustQuantity(amount) {
         const quantityInput = document.getElementById("quantity");
         const hiddenQuantity = document.getElementById("hiddenQuantity");
         let currentQuantity = parseInt(quantityInput.value) || 1;
         let newQuantity = currentQuantity + amount;
 
-        // Kiểm tra giá trị giới hạn của số lượng
         if (newQuantity < 1) {
             newQuantity = 1;
         } else if (newQuantity > maxQuantity) {
@@ -88,19 +114,16 @@
             document.getElementById("error-message").classList.add("hidden");
         }
 
-        // Cập nhật giá trị mới vào cả hai input
         quantityInput.value = newQuantity;
         hiddenQuantity.value = newQuantity;
     }
 
-    // Hàm kiểm tra và đồng bộ giá trị số lượng
     function validateQuantity() {
         const quantityInput = document.getElementById("quantity");
         const hiddenQuantity = document.getElementById("hiddenQuantity");
         const errorMessage = document.getElementById("error-message");
         let currentQuantity = parseInt(quantityInput.value) || 1;
 
-        // Kiểm tra giá trị hợp lệ
         if (currentQuantity < 1) {
             currentQuantity = 1;
         } else if (currentQuantity > maxQuantity) {
@@ -110,22 +133,11 @@
             errorMessage.classList.add("hidden");
         }
 
-        // Cập nhật giá trị mới vào cả hai input
         quantityInput.value = currentQuantity;
         hiddenQuantity.value = currentQuantity;
     }
 
-    // Hàm đồng bộ giá trị số lượng khi gửi biểu mẫu
-    function syncQuantityValue() {
-        const quantityInput = document.getElementById("quantity");
-        const hiddenQuantity = document.getElementById("hiddenQuantity");
-
-        hiddenQuantity.value = quantityInput.value; // Đồng bộ giá trị từ input với hidden input
-    }
-
-    // Thêm sự kiện lắng nghe thay đổi giá trị số lượng
     document.getElementById("quantity").addEventListener("input", validateQuantity);
-
 </script>
 </body>
 </html>

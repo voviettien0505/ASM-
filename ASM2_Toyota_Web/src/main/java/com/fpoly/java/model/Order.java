@@ -24,7 +24,9 @@ public class Order {
 
     private String fullName;
     private String phone;
-    private String status;  // Ví dụ: "PENDING", "COMPLETED"
+    private String status;
+    private double totalAmount;
+    // Ví dụ: "PENDING", "COMPLETED"
 
     @ManyToOne
     @JoinColumn(name = "id_user")

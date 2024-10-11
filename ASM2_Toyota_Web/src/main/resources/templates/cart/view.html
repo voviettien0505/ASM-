@@ -1,13 +1,82 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Cart Item Details</title>
+    <title>Giỏ Hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
-<h2>Cart Item Details</h2>
-<div th:if="${productDetails}">
-    <p th:text="'Product: ' + ${productDetails.productName}"></p>
-    <p th:text="'Quantity: ' + ${productDetails.quantity}"></p>
+<body class="bg-gray-100 p-8">
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">Giỏ Hàng của <span th:text="${user.fullName}"></span></h2>
+
+    <!-- Cart Items Table -->
+    <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+        <thead class="bg-gray-200 text-gray-700">
+        <tr>
+            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Chọn</th>
+            <th class="py-4 px-6 text-left font-semibold border-b border-gray-300">Tên Sản Phẩm</th>
+            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Số Lượng</th>
+            <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Giá (₫)</th>
+            <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Tổng Cộng (₫)</th>
+            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Hành Động</th>
+        </tr>
+        </thead>
+        <tbody class="text-gray-700">
+        <tr th:each="cartItem : ${cartItems}" class="hover:bg-gray-50 transition">
+            <td class="py-4 px-6 text-center border-b border-gray-300">
+                <input type="checkbox" class="item-checkbox" />
+            </td>
+            <td class="py-4 px-6 border-b border-gray-300" th:text="${cartItem.product.name}">Tên sản phẩm</td>
+            <td class="py-4 px-6 text-center border-b border-gray-300" th:text="${cartItem.quantity}">Số lượng</td>
+            <td class="py-4 px-6 text-right border-b border-gray-300" th:text="${#numbers.formatDecimal(cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="py-4 px-6 text-right border-b border-gray-300 total" th:text="${#numbers.formatDecimal(cartItem.quantity * cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+            <td class="py-4 px-6 text-center border-b border-gray-300">
+                <form th:action="@{/cart/remove}" method="post" th:object="${cartItem}">
+                    <input type="hidden" name="cartItemId" th:value="${cartItem.id}"/>
+                    <button type="submit" class="text-red-500 hover:text-red-700 font-semibold">
+                        Xóa
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Total Amount Display -->
+    <div class="mt-6 flex justify-between items-center">
+        <h6 class="text-xl font-bold text-gray-800">Tổng tiền: <span id="total-amount">0</span> ₫</h6>
+        <form th:action="@{/order/place}" method="post">
+            <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-md hover:bg-blue-700 transition duration-300">
+                Đặt Hàng
+            </button>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Function to calculate and display the total amount for selected items
+    function calculateTotal() {
+        let total = 0;
+
+        // Iterate over each selected item and sum the total amount
+        $('.item-checkbox:checked').each(function() {
+            const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, ''); // Remove formatting
+            total += parseFloat(rowTotal) || 0; // Add to total, handling NaN values
+        });
+
+        // Update the total amount display
+        $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+    }
+
+    // Calculate total on page load and whenever a checkbox is clicked
+    $(document).ready(function() {
+        calculateTotal();
+
+        // Recalculate total whenever a checkbox changes
+        $('.item-checkbox').on('change', function() {
+            calculateTotal();
+        });
+    });
+</script>
 </body>
 </html>

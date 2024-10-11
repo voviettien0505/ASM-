@@ -32,13 +32,27 @@ public class CartController {
 
 
 
-//    @GetMapping
-//    public String viewCart(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-//        User user = userService.findByUsername(userDetails.getUsername());
-//        CartItem cartItem = cartItemService.getCartItemsByUser(user);
-//        model.addAttribute("cart", cart);
-//        return "cart/view";
-//    }
+    @GetMapping("/view")
+    public String viewCart(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        // Get the authenticated user's username
+        String username = userDetails.getUsername();
+
+        // Retrieve the user by username
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            // Handle the case if user not found (optional)
+            return "error/userNotFound";
+        }
+
+        // Get cart items for the authenticated user
+        List<CartItem> cartItems = cartItemService.getCartItemsByUser(user);
+
+        // Add attributes to the model for display
+        model.addAttribute("user", user);
+        model.addAttribute("cartItems", cartItems);
+
+        return "cart/view";
+    }
 
     @PostMapping("/add")
     @ResponseBody
@@ -67,6 +81,6 @@ public class CartController {
     @PostMapping("/remove")
     public String removeFromCart(@RequestParam Long cartItemId) {
         cartItemService.deleteCartItem(cartItemId);
-        return "redirect:/cart";
+        return "redirect:/cart/view";
     }
 }
