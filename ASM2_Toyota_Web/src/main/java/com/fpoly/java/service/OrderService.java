@@ -1,36 +1,53 @@
 package com.fpoly.java.service;
 
-import com.fpoly.java.model.Order;
-import com.fpoly.java.model.OrderDetail;
+import com.fpoly.java.model.*;
+import com.fpoly.java.repository.CartItemRepository;
 import com.fpoly.java.repository.OrderDetailRepository;
 import com.fpoly.java.repository.OrderRepository;
+import com.fpoly.java.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
-
 @Service
 public class OrderService {
-
     @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId);
-    }
+    @Autowired
+    private ProductRepository productRepository;
 
-    public List<OrderDetail> getOrderDetailsByOrderId(Long orderId) {
-        return orderDetailRepository.findByOrderId(orderId);
-    }
+    public void createOrder(User user, List<Long> productIds, List<Integer> quantities) {
+        Order order = new Order();
+        order.setUser(user);
+        order.setDate(new Date());
+        order.setStatus("Pending");
 
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
-    }
+        // Lưu đơn hàng
+        order = orderRepository.save(order);
 
-    public void deleteOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+        // Lưu chi tiết đơn hàng
+        for (int i = 0; i < productIds.size(); i++) {
+            Long productId = productIds.get(i);
+            Integer quantity = quantities.get(i);
+
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product != null) {
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setOrder(order);
+                orderDetail.setProduct(product);
+                orderDetail.setQuantity(quantity);
+                orderDetail.setPrice(product.getPrice() * quantity);
+
+                // Lưu chi tiết đơn hàng
+                orderDetailRepository.save(orderDetail);
+            }
+        }
     }
 }
+
+
