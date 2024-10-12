@@ -23,7 +23,10 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
-    public void createOrderWithSelectedItems(User user, List<Long> productIds, List<Integer> quantities) {
+    @Autowired
+    private CartItemService cartItemService;
+
+    public void createOrderWithSelectedItems(User user, List<Long> productIds, List<Integer> quantities, double totalAmount) {
         if (productIds.isEmpty() || quantities.isEmpty()) {
             throw new IllegalArgumentException("No products selected.");
         }
@@ -32,6 +35,7 @@ public class OrderService {
         order.setUser(user);
         order.setDate(new Date());
         order.setStatus("Pending");
+        order.setTotalAmount(totalAmount);  // Set total amount here
 
         // Save the order to generate an ID
         order = orderRepository.save(order);
@@ -53,6 +57,8 @@ public class OrderService {
                 orderDetailRepository.save(orderDetail);
             }
         }
+
+        // Delete selected items from the user's cart
+        cartItemService.deleteSelectedCartItems(user, productIds);
     }
 }
-

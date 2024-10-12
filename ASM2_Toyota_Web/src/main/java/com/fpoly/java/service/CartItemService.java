@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CartItemService {
@@ -40,6 +41,15 @@ public class CartItemService {
     // Inside CartItemService
     public String getProductNameByProductId(Long productId) {
         return cartItemRepository.findProductNameByProductId(productId);
+    }
+
+    public void deleteSelectedCartItems(User user, List<Long> productIds) {
+        List<CartItem> cartItems = cartItemRepository.findByUser(user);
+        List<CartItem> itemsToDelete = cartItems.stream()
+                .filter(item -> productIds.contains(item.getProduct().getId()))
+                .collect(Collectors.toList());
+
+        cartItemRepository.deleteAll(itemsToDelete);
     }
 
 

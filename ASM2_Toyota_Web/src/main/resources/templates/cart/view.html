@@ -9,7 +9,7 @@
 <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Giỏ Hàng của <span th:text="${user.fullName}"></span></h2>
 
-    <!-- Cart Items Table -->
+    <!-- Bảng Sản Phẩm trong Giỏ Hàng -->
     <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
         <thead class="bg-gray-200 text-gray-700">
         <tr>
@@ -44,10 +44,12 @@
         </tbody>
     </table>
 
-    <!-- Total Amount Display -->
+    <!-- Hiển thị Tổng Tiền và Đặt Hàng -->
     <div class="mt-6 flex justify-between items-center">
         <h6 class="text-xl font-bold text-gray-800">Tổng tiền: <span id="total-amount">0</span> ₫</h6>
         <form id="place-order-form" th:action="@{/order/place}" method="post">
+            <!-- Input ẩn để giữ tổng tiền -->
+            <input type="hidden" name="totalAmount" id="hidden-total-amount" value="0">
             <button type="submit" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-md hover:bg-blue-700 transition duration-300">
                 Đặt Hàng
             </button>
@@ -56,45 +58,45 @@
 
 </div>
 
+<!-- JavaScript xử lý tính toán và gửi form -->
 <script>
     $(document).ready(function() {
         calculateTotal();
 
-        // Recalculate the total when checkbox status changes
+        // Cập nhật tổng tiền khi chọn hoặc bỏ chọn sản phẩm
         $('.item-checkbox').on('change', function() {
             calculateTotal();
         });
 
-        // Filter selected items and submit the form
+        // Xử lý gửi form đặt hàng
         $('#place-order-form').on('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Ngăn chặn hành vi gửi mặc định
 
-            // Remove previous hidden inputs to avoid duplication
+            // Xóa các input ẩn cũ để tránh trùng lặp
             $('#place-order-form input[name="productIds"]').remove();
             $('#place-order-form input[name="quantities"]').remove();
 
-            // Loop over checked checkboxes and collect data
+            // Thêm các input ẩn chứa ID và số lượng sản phẩm đã chọn
             $('.item-checkbox:checked').each(function() {
                 const row = $(this).closest('tr');
                 const productId = row.find('.product-id').val();
                 const quantity = row.find('.product-quantity').val();
 
-                // Append data to the form
                 $('#place-order-form').append(`<input type="hidden" name="productIds" value="${productId}">`);
                 $('#place-order-form').append(`<input type="hidden" name="quantities" value="${quantity}">`);
             });
 
-            // Check that at least one item is selected
+            // Kiểm tra có ít nhất một sản phẩm được chọn
             if ($('.item-checkbox:checked').length === 0) {
-                alert('Please select at least one item to place an order.');
+                alert('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
                 return false;
             }
 
-            // Submit the form
+            // Gửi form
             this.submit();
         });
 
-        // Calculate the total amount for selected items
+        // Hàm tính và hiển thị tổng tiền
         function calculateTotal() {
             let total = 0;
             $('.item-checkbox:checked').each(function() {
@@ -102,56 +104,7 @@
                 total += parseFloat(rowTotal) || 0;
             });
             $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
-        }
-    });
-</script>
-
-<script>
-    $(document).ready(function() {
-        calculateTotal();
-
-        // Update the total amount when items are selected or deselected
-        $('.item-checkbox').on('change', function() {
-            calculateTotal();
-        });
-
-        // Handle form submission
-        $('#place-order-form').on('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            // Clear previous hidden inputs to avoid duplicates
-            $('#place-order-form input[name="productIds"]').remove();
-            $('#place-order-form input[name="quantities"]').remove();
-
-            // Add hidden inputs for selected products and their quantities
-            $('.item-checkbox:checked').each(function() {
-                const row = $(this).closest('tr');
-                const productId = row.find('.product-id').val();
-                const quantity = row.find('.product-quantity').val();
-
-                // Append the selected items' IDs and quantities to the form
-                $('#place-order-form').append(`<input type="hidden" name="productIds" value="${productId}">`);
-                $('#place-order-form').append(`<input type="hidden" name="quantities" value="${quantity}">`);
-            });
-
-            // Ensure at least one item is selected before submitting
-            if ($('.item-checkbox:checked').length === 0) {
-                alert('Please select at least one product to place an order.');
-                return false;
-            }
-
-            // Submit the form
-            this.submit();
-        });
-
-        // Calculate and display the total for selected items
-        function calculateTotal() {
-            let total = 0;
-            $('.item-checkbox:checked').each(function() {
-                const rowTotal = $(this).closest('tr').find('.total').text().replace(/[₫,]/g, '');
-                total += parseFloat(rowTotal) || 0;
-            });
-            $('#total-amount').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+            $('#hidden-total-amount').val(total);  // Gán tổng tiền vào input ẩn để gửi đến backend
         }
     });
 </script>

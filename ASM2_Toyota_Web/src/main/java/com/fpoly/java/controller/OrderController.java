@@ -22,17 +22,19 @@ public class OrderController {
 
     @Autowired
     private UserService userService;
-
     @PostMapping("/place")
     public String placeOrder(@AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam List<Long> productIds,
-                             @RequestParam List<Integer> quantities) {
+                             @RequestParam List<Integer> quantities,
+                             @RequestParam("totalAmount") double totalAmount) {
         User user = userService.getUserByUsername(userDetails.getUsername());
         if (user == null) {
             return "error/userNotFound";
         }
 
-        orderService.createOrderWithSelectedItems(user, productIds, quantities);
+        orderService.createOrderWithSelectedItems(user, productIds, quantities, totalAmount);
         return "redirect:/order/confirmation";
     }
+
 }
+
