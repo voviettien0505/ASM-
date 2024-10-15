@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<!-- Header -->
+<header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900">Order Tracking</h1>
+    </div>
+</header>
+
+<!-- Main content -->
+<main class="py-10">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Order list -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Order #12345678</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Placed on: October 12, 2024</p>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Order Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                <span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    Shipped
+                                </span>
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Tracking Number</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">1Z9999999999999999</dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Shipping Address</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            1234 Elm Street, Springfield, IL, 62704, USA
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Items Ordered</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                    <div class="w-0 flex-1 flex items-center">
+                                        <span class="ml-2 flex-1 w-0 truncate">Product 1 - Quantity: 2</span>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <span class="font-medium text-indigo-600">Price: $50.00</span>
+                                    </div>
+                                </li>
+                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                                    <div class="w-0 flex-1 flex items-center">
+                                        <span class="ml-2 flex-1 w-0 truncate">Product 2 - Quantity: 1</span>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <span class="font-medium text-indigo-600">Price: $100.00</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Total Price</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">$200.00</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

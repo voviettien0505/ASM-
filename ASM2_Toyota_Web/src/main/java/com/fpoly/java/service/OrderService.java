@@ -1,7 +1,6 @@
 package com.fpoly.java.service;
 
 import com.fpoly.java.model.*;
-import com.fpoly.java.repository.CartItemRepository;
 import com.fpoly.java.repository.OrderDetailRepository;
 import com.fpoly.java.repository.OrderRepository;
 import com.fpoly.java.repository.ProductRepository;
@@ -26,7 +25,7 @@ public class OrderService {
     @Autowired
     private CartItemService cartItemService;
 
-    public void createOrderWithSelectedItems(User user, List<Long> productIds, List<Integer> quantities, double totalAmount) {
+    public Order createOrderWithSelectedItems(User user, List<Long> productIds, List<Integer> quantities, double totalAmount) {
         if (productIds.isEmpty() || quantities.isEmpty()) {
             throw new IllegalArgumentException("No products selected.");
         }
@@ -60,5 +59,18 @@ public class OrderService {
 
         // Delete selected items from the user's cart
         cartItemService.deleteSelectedCartItems(user, productIds);
+        return order;
+    }
+
+    public List<Order> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId).orElse(null);
     }
 }
