@@ -5,48 +5,67 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body class="bg-gray-100 p-8">
-<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8">
+<!-- Header -->
+<header class="bg-white w-full shadow">
+    <div class="container mx-auto flex justify-between items-center py-4 px-6">
+        <img alt="Toyota Logo" class="h-10" src="https://www.toyota.com.vn/media/d1pmr5qz/logo-toyota.jpg" width="100"/>
+        <nav class="flex space-x-4">
+            <a class="text-gray-700 hover:text-red-600" href="#">Sản phẩm</a>
+            <a class="text-gray-700 hover:text-red-600" href="#">Công nghệ</a>
+            <a class="text-gray-700 hover:text-red-600" href="#">Dịch vụ &amp; bảo hành</a>
+            <a class="text-gray-700 hover:text-red-600" href="#">Tin tức</a>
+            <a class="text-gray-700 hover:text-red-600" href="#">Tuyển dụng</a>
+            <a class="text-gray-700 hover:text-red-600" href="#">Liên hệ</a>
+        </nav>
+    </div>
+</header>
+
+<div class="w-full max-w-5xl bg-white p-8 mt-8 rounded-lg shadow-lg">
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Giỏ Hàng của <span th:text="${user.fullName}"></span></h2>
 
     <!-- Bảng Sản Phẩm trong Giỏ Hàng -->
-    <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
-        <thead class="bg-gray-200 text-gray-700">
-        <tr>
-            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Chọn</th>
-            <th class="py-4 px-6 text-left font-semibold border-b border-gray-300">Tên Sản Phẩm</th>
-            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Số Lượng</th>
-            <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Giá (₫)</th>
-            <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Tổng Cộng (₫)</th>
-            <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Hành Động</th>
-        </tr>
-        </thead>
-        <tbody class="text-gray-700">
-        <tr th:each="cartItem : ${cartItems}" class="hover:bg-gray-50 transition">
-            <td class="py-4 px-6 text-center border-b border-gray-300">
-                <input type="checkbox" class="item-checkbox" />
-                <input type="hidden" class="product-id" th:value="${cartItem.product.id}"/>
-                <input type="hidden" class="product-quantity" th:value="${cartItem.quantity}"/>
-            </td>
-            <td class="py-4 px-6 border-b border-gray-300" th:text="${cartItem.product.name}">Tên sản phẩm</td>
-            <td class="py-4 px-6 text-center border-b border-gray-300" th:text="${cartItem.quantity}">Số lượng</td>
-            <td class="py-4 px-6 text-right border-b border-gray-300" th:text="${#numbers.formatDecimal(cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
-            <td class="py-4 px-6 text-right border-b border-gray-300 total" th:text="${#numbers.formatDecimal(cartItem.quantity * cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
-            <td class="py-4 px-6 text-center border-b border-gray-300">
-                <form th:action="@{/cart/remove}" method="post" th:object="${cartItem}">
-                    <input type="hidden" name="cartItemId" th:value="${cartItem.id}"/>
-                    <button type="submit" class="text-red-500 hover:text-red-700 font-semibold">
-                        Xóa
-                    </button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+            <thead class="bg-gray-200 text-gray-700">
+            <tr>
+                <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">
+                    <input type="checkbox" id="select-all" /> <!-- Checkbox chọn tất cả -->
+                </th>
+                <th class="py-4 px-6 text-left font-semibold border-b border-gray-300">Tên Sản Phẩm</th>
+                <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Số Lượng</th>
+                <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Giá (₫)</th>
+                <th class="py-4 px-6 text-right font-semibold border-b border-gray-300">Tổng Cộng (₫)</th>
+                <th class="py-4 px-6 text-center font-semibold border-b border-gray-300">Hành Động</th>
+            </tr>
+            </thead>
+            <tbody class="text-gray-700">
+            <tr th:each="cartItem : ${cartItems}" class="hover:bg-gray-50 transition">
+                <td class="py-4 px-6 text-center border-b border-gray-300">
+                    <input type="checkbox" class="item-checkbox" />
+                    <input type="hidden" class="product-id" th:value="${cartItem.product.id}"/>
+                    <input type="hidden" class="product-quantity" th:value="${cartItem.quantity}"/>
+                </td>
+                <td class="py-4 px-6 border-b border-gray-300" th:text="${cartItem.product.name}">Tên sản phẩm</td>
+                <td class="py-4 px-6 text-center border-b border-gray-300" th:text="${cartItem.quantity}">Số lượng</td>
+                <td class="py-4 px-6 text-right border-b border-gray-300" th:text="${#numbers.formatDecimal(cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="py-4 px-6 text-right border-b border-gray-300 total" th:text="${#numbers.formatDecimal(cartItem.quantity * cartItem.product.price, 1, 'COMMA', 2, 'POINT')}">0</td>
+                <td class="py-4 px-6 text-center border-b border-gray-300">
+                    <form th:action="@{/cart/remove}" method="post" th:object="${cartItem}">
+                        <input type="hidden" name="cartItemId" th:value="${cartItem.id}"/>
+                        <button type="submit" class="text-red-500 hover:text-red-700 font-semibold">
+                            Xóa
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
     <!-- Hiển thị Tổng Tiền và Đặt Hàng -->
     <div class="mt-6 flex justify-between items-center">
-        <h6 class="text-xl font-bold text-gray-800">Tổng tiền: <span id="total-amount">0</span> ₫</h6>
+        <h6 class="text-xl font-bold text-gray-800">Tổng tiền: <span id="total-amount">0</span> </h6>
         <form id="place-order-form" th:action="@{/order/place}" method="post">
             <!-- Input ẩn để giữ tổng tiền -->
             <input type="hidden" name="totalAmount" id="hidden-total-amount" value="0">
@@ -55,7 +74,6 @@
             </button>
         </form>
     </div>
-
 </div>
 
 <!-- JavaScript xử lý tính toán và gửi form -->
@@ -63,8 +81,17 @@
     $(document).ready(function() {
         calculateTotal();
 
+        // Xử lý "Chọn tất cả"
+        $('#select-all').on('change', function() {
+            $('.item-checkbox').prop('checked', $(this).prop('checked'));
+            calculateTotal();
+        });
+
         // Cập nhật tổng tiền khi chọn hoặc bỏ chọn sản phẩm
         $('.item-checkbox').on('change', function() {
+            if (!$(this).prop('checked')) {
+                $('#select-all').prop('checked', false);
+            }
             calculateTotal();
         });
 
@@ -108,6 +135,5 @@
         }
     });
 </script>
-
 </body>
 </html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Đơn Hàng</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100 font-sans antialiased leading-relaxed tracking-wide">
+
+<div class="container mx-auto my-12 px-6">
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-6">
+      <h1 class="text-4xl font-bold">Chi Tiết Đơn Hàng</h1>
+    </div>
+    <div class="p-6">
+      <!-- Thông tin Đơn Hàng -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4">Thông Tin Đơn Hàng</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+          <p><span class="font-medium">Mã Đơn Hàng:</span> <span id="order-id" th:text="${order.id}">123456</span></p>
+          <p><span class="font-medium">Tên Khách Hàng:</span> <span th:text="${order.fullName}">Nguyễn Văn A</span></p>
+          <p><span class="font-medium">Số Điện Thoại:</span> <span th:text="${order.phone}">(555) 123-4567</span></p>
+          <p><span class="font-medium">Địa Chỉ:</span> <span th:text="${order.address}">123 Đường Chính, Quận 1</span></p>
+          <p><span class="font-medium">Ngày Đặt Hàng:</span> <span th:text="${#dates.format(order.date, 'dd/MM/yyyy HH:mm')}">14/10/2024 12:34</span></p>
+          <p><span class="font-medium">Trạng Thái:</span> <span id="order-status" th:text="${order.status}">Chờ Xử Lý</span></p>
+          <p><span class="font-medium">Tổng Tiền:</span> <span id="total-amount" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">150.000</span> ₫</p>
+        </div>
+      </div>
+
+      <!-- Chi tiết sản phẩm -->
+      <h2 class="text-2xl font-semibold text-gray-800 border-b pb-3 mb-4">Sản Phẩm Trong Đơn Hàng</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200">
+          <thead>
+          <tr class="bg-gray-50 border-b text-gray-600 text-sm uppercase font-semibold tracking-wider">
+            <th class="py-3 px-4 text-left">Sản Phẩm</th>
+            <th class="py-3 px-4 text-left">Số Lượng</th>
+            <th class="py-3 px-4 text-left">Đơn Giá</th>
+            <th class="py-3 px-4 text-left">Thành Tiền</th>
+          </tr>
+          </thead>
+          <tbody class="text-gray-700 text-sm divide-y divide-gray-200">
+          <tr th:each="orderDetail : ${orderDetails}" class="hover:bg-gray-50">
+            <td class="py-3 px-4" th:text="${orderDetail.product.name}">Sản Phẩm A</td>
+            <td class="py-3 px-4" th:text="${orderDetail.quantity}">2</td>
+            <td class="py-3 px-4" th:text="${#numbers.formatDecimal(orderDetail.price, 1, 'COMMA', 2, 'POINT')}">50.000</td>
+            <td class="py-3 px-4" th:text="${#numbers.formatDecimal(orderDetail.price * orderDetail.quantity, 1, 'COMMA', 2, 'POINT')}">100.000</td>
+          </tr>
+          </tbody>
+          <tfoot>
+          <tr class="bg-gray-50">
+            <td colspan="3" class="py-3 px-4 text-right font-semibold text-gray-800">Tổng Cộng</td>
+            <td class="py-3 px-4 font-bold text-gray-800" th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">150.000 ₫</td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Nút Thanh Toán - Hiển thị khi trạng thái là "Chờ Thanh Toán" -->
+      <div class="text-center mt-8">
+        <button id="pay-button" class="btn btn-primary" style="display: none;" onclick="handlePayment() ">Thanh Toán</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // Kết nối WebSocket sau khi hiển thị nút thanh toán
+  var stompClient = null;
+
+  function connectWebSocket() {
+    var socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function(frame) {
+      console.log('Kết nối WebSocket thành công:', frame);
+    });
+  }
+  function handlePayment() {
+    const orderId = $('#order-id').text();
+    const message = `Đơn hàng ${orderId} đã được thanh toán!`;
+    if (confirm('Bạn có chắc chắn muốn thanh toán cho đơn hàng này?')) {
+      $.ajax({
+        url: `/order/sendNotification`, // Đảm bảo URL này đúng
+        type: 'POST',
+        data: { message: message },
+        success: function() {
+          console.log('Thông báo đã được gửi đi.');
+          $('#payment-message').show();
+          $('#payment-message').text(message);
+        },
+        error: function() {
+          console.error('Không thể gửi thông báo.');
+        }
+      });
+    }
+  }
+
+
+
+  function checkOrderStatus() {
+    const orderId = $('#order-id').text();
+
+    $.ajax({
+      url: `/order/status`,
+      type: 'GET',
+      data: { orderId: orderId },
+      success: function(response) {
+        console.log("Trạng thái đơn hàng:", response.status);
+        $('#order-status').text(response.status);
+
+        if (response.status && response.status === 'CHO_THANH_TOAN') {
+          $('#pay-button').show();
+        } else {
+          $('#pay-button').hide();
+        }
+      },
+      error: function() {
+        console.error('Không thể tải trạng thái đơn hàng');
+      }
+    });
+  }
+
+  // Gọi checkOrderStatus ngay khi trang tải và sau đó kết nối WebSocket
+  $(document).ready(function() {
+    checkOrderStatus(); // Kiểm tra trạng thái đơn hàng ngay lập tức khi trang tải
+    setInterval(checkOrderStatus, 2000); // Tiếp tục kiểm tra định kỳ
+    connectWebSocket(); // Kết nối WebSocket sau khi kiểm tra trạng thái
+  });
+</script>
+
+</body>
+</html>

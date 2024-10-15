@@ -22,7 +22,7 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    // Show the list of categories
+
     @GetMapping("/admin")
     public String showCategoryList(Model model) {
         List<Category> categories = categoryService.getAllCategories();
@@ -38,7 +38,7 @@ public class CategoryController {
                 Path uploadDir = Paths.get("images");
                 Files.createDirectories(uploadDir);
 
-                // Create a unique file name
+
                 String fileName = new Date().getTime() + "_" + image.getOriginalFilename();
                 Files.copy(image.getInputStream(), uploadDir.resolve(fileName));
                 category.setCategoryImage(fileName);
@@ -46,7 +46,7 @@ public class CategoryController {
                 e.printStackTrace();
             }
         } else if (category.getId() != null) {
-            // Keep the current image if no new image is uploaded
+
             Category existingCategory = categoryService.getCategoryById(category.getId());
             if (existingCategory != null) {
                 category.setCategoryImage(existingCategory.getCategoryImage());
@@ -58,7 +58,7 @@ public class CategoryController {
     }
 
 
-    // Chỉnh sửa trong CategoryController để đảm bảo dữ liệu được đổ vào form khi chỉnh sửa
+
     @GetMapping("/edit/{id}")
     public String editCategory(@PathVariable Long id, Model model) {
         Category category = categoryService.getCategoryById(id);
@@ -70,14 +70,13 @@ public class CategoryController {
         return "admin/manageCategory";
     }
 
-    // Delete category by ID
+
     @GetMapping("/delete/{id}")
     public String deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return "redirect:/category/admin";
     }
 
-    // Add a new category
     @GetMapping("/add")
     public String addCategory(Model model) {
         model.addAttribute("category", new Category());

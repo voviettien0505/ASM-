@@ -12,12 +12,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 @Controller
 @RequestMapping("/home")
 public class HomeController {
@@ -28,27 +27,34 @@ public class HomeController {
     @Autowired
     private CategoryService categoryService;
 
+    // Phương thức định dạng tiền tệ
+    private String formatCurrency(double amount) {
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        return formatter.format(amount) + " VND";
+    }
+
     @GetMapping("/index")
     public String indexController(Model model) {
         List<Product> products = productService.getAllProducts();
-
-        // Map lưu sản phẩm ID và tên ảnh đầu tiên
         Map<Long, String> productImageMap = new HashMap<>();
+        Map<Long, String> productPriceMap = new HashMap<>(); // Map để lưu giá định dạng
 
-        // Lặp qua từng sản phẩm để lấy ảnh đầu tiên
         for (Product product : products) {
             List<Image> images = imageService.getImagesByProductId(product.getId());
             if (!images.isEmpty()) {
                 productImageMap.put(product.getId(), images.get(0).getImageName());
             }
+            // Định dạng giá tiền và lưu vào productPriceMap
+            productPriceMap.put(product.getId(), formatCurrency(product.getPrice()));
         }
+
         List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
         model.addAttribute("products", products);
         model.addAttribute("productImageMap", productImageMap);
+        model.addAttribute("productPriceMap", productPriceMap); // Gửi productPriceMap đến view
         model.addAttribute("product", new Product());
 
         return "user/index";
-
     }
 }

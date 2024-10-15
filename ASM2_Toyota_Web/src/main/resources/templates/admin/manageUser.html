@@ -39,40 +39,24 @@
     <div class="row">
         <!-- Sidebar -->
         <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
-            <div class="position-sticky">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <i class="bi bi-speedometer2"></i>
-                            Quản Lý
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/category/admin">
-                            <i class="bi bi-list"></i>
-                            Quản Lý Danh Mục
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/product/admin">
-                            <i class="bi bi-box"></i>
-                            Quản Lý Sản Phẩm
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/user/admin">
-                            <i class="bi bi-people-fill"></i>
-                            Quản Lý Người Dùng
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-gear-fill"></i>
-                            Cài đặt
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <!-- Sidebar links -->
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#"><i class="bi bi-speedometer2"></i> Quản Lý</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/category/admin"><i class="bi bi-car-front-fill"></i> Quản Lý Danh Mục</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/product/admin"><i class="bi bi-car-front-fill"></i> Quản Lý Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/admin"><i class="bi bi-car-front-fill"></i> Quản Lý Người Dùng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/order/admin"><i class="bi bi-car-front-fill"></i> Quản Lý Đơn Hàng</a>
+                </li>
+            </ul>
         </nav>
 
         <!-- Main Content -->
@@ -159,7 +143,7 @@
                         <td th:text="${user.phone}">Số điện thoại</td>
                         <td th:text="${user.username}">Tên người dùng</td>
                         <td th:text="${user.address}">Địa chỉ</td>
-                        <td th:text="${user.role != null && user.role ? 'Quản trị viên' : 'Người dùng'}"></td>
+                        <td th:text="${user.role == 'ADMIN' ? 'Quản trị viên' : 'Người dùng'}"></td>
                         <td>
                             <a th:href="@{/user/edit/{id}(id=${user.id})}" class="btn btn-sm btn-warning">Sửa</a>
                             <a th:href="@{/user/delete/{id}(id=${user.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">Xóa</a>

@@ -10,12 +10,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-
 @Controller
 public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -23,13 +25,10 @@ public class AuthController {
         return "login/register";
     }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder; // Tự động tiêm PasswordEncoder
-
     @PostMapping("/register")
     public String registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // Mã hóa mật khẩu
-        user.setRole("USER"); // Đặt role mặc định là USER hoặc ADMIN
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("USER");
         userService.saveUser(user);
         return "redirect:/login";
     }
@@ -52,9 +51,22 @@ public class AuthController {
         existingUser.setUsername(user.getUsername());
         existingUser.setEmail(user.getEmail());
         if (!user.getPassword().isEmpty()) {
-            existingUser.setPassword(user.getPassword());
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userService.saveUser(existingUser);
+        return "redirect:/home/index";
+    }
+    @GetMapping("/redirectAfterLogin")
+    public String redirectAfterLogin(@AuthenticationPrincipal UserDetails userDetails) {
+        // Lấy thông tin người dùng từ dịch vụ
+        User user = userService.getUserByUsername(userDetails.getUsername());
+
+        // Kiểm tra nếu vai trò là ADMIN, chuyển hướng đến trang quản lý người dùng
+        if (user.getRole().equals("ADMIN")) {
+            return "redirect:/user/admin";
+        }
+
+        // Nếu không phải ADMIN, chuyển hướng về trang chủ người dùng
         return "redirect:/home/index";
     }
 }
